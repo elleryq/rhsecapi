@@ -83,7 +83,7 @@ def fpaste_it(inputdata, lang='text', author=None, password=None, private='no', 
         params['paste_user'] = author
     # Check size of what we're about to post and raise exception if too big
     # FIXME: Figure out how to do this in requests without wasteful call to urllib.urlencode()
-    from urllib import urlencode
+    from urllib.parse import urlencode
     p = urlencode(params)
     pasteSizeKiB = len(p)/1024.0
     if pasteSizeKiB >= 512:
@@ -283,7 +283,7 @@ def parse_args():
     if o.showHelp:
         from tempfile import NamedTemporaryFile
         from subprocess import call
-        tmp = NamedTemporaryFile(prefix='{0}-help-'.format(prog), suffix='.txt')
+        tmp = NamedTemporaryFile(mode='wt', prefix='{0}-help-'.format(prog), suffix='.txt')
         p.print_help(file=tmp)
         tmp.flush()
         call(['less', tmp.name])
@@ -347,7 +347,7 @@ def parse_args():
 def main(opts):
     apiclient = rhsda.ApiClient(opts.loglevel)
     from os import environ
-    if environ.has_key('RHSDA_URL') and environ['RHSDA_URL'].startswith('http'):
+    if 'RHSDA_URL' in environ and environ['RHSDA_URL'].startswith('http'):
         apiclient.cfg.apiUrl = environ['RHSDA_URL']
     searchOutput = ""
     iavaOutput = ""

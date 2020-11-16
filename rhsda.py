@@ -19,14 +19,18 @@
 from __future__ import print_function
 import requests
 import logging
+import io
 import sys
 import re
 import textwrap, fcntl, termios, struct
 import json
 import signal
-import copy_reg
+import copyreg
 import types
 import multiprocessing.dummy as multiprocessing
+if 'cpu_count' not in dir(multiprocessing):
+    import os
+    multiprocessing.cpu_count = os.cpu_count
 from argparse import Namespace
 
 
@@ -101,7 +105,6 @@ cveFields.aliases_printable = [
 # A list of all fields + all aliases
 cveFields.all_plus_aliases = list(cveFields.all)
 cveFields.all_plus_aliases.extend([k for k in cveFields.aliases])
-del(k)
 
 
 # Regex to match a CVE id string
@@ -118,7 +121,7 @@ def _reduce_method(m):
     else:
         return getattr, (m.__self__, m.__func__.__name__)
 
-copy_reg.pickle(types.MethodType, _reduce_method)
+copyreg.pickle(types.MethodType, _reduce_method)
 
 
 # Set default number of worker threads
@@ -728,7 +731,7 @@ class ApiClient:
         """
         if outFormat not in ['plaintext', 'json', 'jsonpretty']:
             raise ValueError("Invalid outFormat ('{0}') requested; should be one of: 'plaintext', 'json', 'jsonpretty'".format(outFormat))
-        if isinstance(cves, str) or isinstance(cves, file):
+        if isinstance(cves, str) or isinstance(cves, io.IOBase):
             cves = extract_cves_from_input(cves)
         elif not isinstance(cves, list):
             raise ValueError("Invalid 'cves=' argument input; must be list, string, or file obj")
